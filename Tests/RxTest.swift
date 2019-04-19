@@ -88,6 +88,7 @@ extension RxTest {
 
     func setUpActions(){
         _ = Hooks.defaultErrorHandler // lazy load resource so resource count matches
+        _ = Hooks.customCaptureSubscriptionCallstack // lazy load resource so resource count matches
         #if TRACE_RESOURCES
             self.startResourceCount = Resources.total
             //registerMallocHooks()
@@ -102,7 +103,9 @@ extension RxTest {
                 if self.startResourceCount < Resources.total {
                     // main schedulers need to finish work
                     print("Waiting for resource cleanup ...")
-                    RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date(timeIntervalSinceNow: 0.05)  )
+                    let mode = RunLoop.Mode.default
+
+                    RunLoop.current.run(mode: mode, before: Date(timeIntervalSinceNow: 0.05))
                 }
                 else {
                     break
@@ -122,4 +125,3 @@ extension RxTest {
         #endif
     }
 }
-

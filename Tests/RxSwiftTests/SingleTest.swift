@@ -43,9 +43,9 @@ extension SingleTest {
     func testSingle_create_success() {
         let scheduler = TestScheduler(initialClock: 0)
 
-        var observer: ((SingleEvent<Int>) -> ())! = nil
+        var observer: ((SingleEvent<Int>) -> Void)! = nil
 
-        var disposedTime: Int? = nil
+        var disposedTime: Int?
 
         scheduler.scheduleAt(201, action: {
             observer(.success(1))
@@ -77,9 +77,9 @@ extension SingleTest {
     func testSingle_create_error() {
         let scheduler = TestScheduler(initialClock: 0)
 
-        var observer: ((SingleEvent<Int>) -> ())! = nil
+        var observer: ((SingleEvent<Int>) -> Void)! = nil
 
-        var disposedTime: Int? = nil
+        var disposedTime: Int?
 
         scheduler.scheduleAt(201, action: {
             observer(.error(testError))
@@ -110,8 +110,8 @@ extension SingleTest {
     func testSingle_create_disposing() {
         let scheduler = TestScheduler(initialClock: 0)
 
-        var observer: ((SingleEvent<Int>) -> ())! = nil
-        var disposedTime: Int? = nil
+        var observer: ((SingleEvent<Int>) -> Void)! = nil
+        var disposedTime: Int?
         var subscription: Disposable! = nil
         let res = scheduler.createObserver(Int.self)
 
@@ -166,7 +166,7 @@ extension SingleTest {
     }
 
     func test_never_producesElement() {
-        var event: SingleEvent<Int>? = nil
+        var event: SingleEvent<Int>?
         let subscription = (Single<Int>.never() as Single<Int>).subscribe { _event in
             event = _event
         }
@@ -545,6 +545,68 @@ extension SingleTest {
         XCTAssertEqual(res.events, [
             .next(200, 2),
             .completed(200)
+            ])
+    }
+
+    func test_flatMapMaybe() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(1).flatMapMaybe { Maybe.just($0 * 2) } as Maybe<Int>).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .next(200, 2),
+            .completed(200)
+            ])
+    }
+
+    func test_flatMapCompletable() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(10).flatMapCompletable { _ in Completable.empty() } as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .completed(200)
+            ])
+    }
+
+    func test_asMaybe() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(1).asMaybe() as Maybe<Int>).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .next(200, 1),
+            .completed(200)
+            ])
+    }
+
+    func test_asCompletable() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(5).asCompletable() as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .completed(200)
+            ])
+    }
+
+    func test_asCompletableError() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.error(testError).asCompletable() as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .error(200, testError)
             ])
     }
 }

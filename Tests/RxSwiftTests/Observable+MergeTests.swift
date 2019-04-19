@@ -23,7 +23,7 @@ extension ObservableMergeTest {
             Observable.of(0, 1, 2)
         ).merge()
         
-        _ = observable.subscribe(onNext: { n in
+        _ = observable.subscribe(onNext: { _ in
             nEvents += 1
         })
         
@@ -39,21 +39,21 @@ extension ObservableMergeTest {
             Observable.of(0, 1, 2)
         ).merge()
         
-        _ = observable.subscribe(onError: { n in
+        _ = observable.subscribe(onError: { _ in
             nEvents += 1
         })
         
         XCTAssertEqual(nEvents, 1)
     }
     
-    func testMerge_DeadlockErrorImmediatelly() {
+    func testMerge_DeadlockErrorImmediately() {
         var nEvents = 0
         
         let observable: Observable<Observable<Int>> = Observable.just(
             Observable.error(testError)
         ).merge()
 
-        _ = observable.subscribe(onError: { n in
+        _ = observable.subscribe(onError: { _ in
             nEvents += 1
         })
         
@@ -91,7 +91,7 @@ extension ObservableMergeTest {
             Observable.of(0, 1, 2)
         ).merge(maxConcurrent: 1)
         
-        _ = observable.subscribe(onNext: { n in
+        _ = observable.subscribe(onNext: { _ in
             nEvents += 1
         })
         
@@ -114,14 +114,14 @@ extension ObservableMergeTest {
         XCTAssertEqual(nEvents, 1)
     }
     
-    func testMergeConcurrent_DeadlockErrorImmediatelly() {
+    func testMergeConcurrent_DeadlockErrorImmediately() {
         var nEvents = 0
         
         let observable: Observable<Observable<Int>> = Observable.just(
             Observable.error(testError)
         ).merge(maxConcurrent: 1)
 
-        _ = observable.subscribe(onError: { n in
+        _ = observable.subscribe(onError: { _ in
             nEvents += 1
         })
         
@@ -1016,7 +1016,7 @@ extension ObservableMergeTest {
         }
     }
 
-    func testMergeSync_EmptyData_DoesntCompleteImmediatelly() {
+    func testMergeSync_EmptyData_DoesntCompleteImmediately() {
         let factories: [(Observable<Int>, Observable<Int>) -> Observable<Int>] =
             [
                 { ys1, ys2 in Observable.merge(ys1, ys2) },
@@ -1753,7 +1753,7 @@ extension ObservableMergeTest {
             ])
 
         let res = scheduler.start {
-            xs.flatMapFirst { (x) in
+            xs.flatMapFirst { x in
                 return Observable<Int64>.interval(10, scheduler: scheduler).map { _ in x } .take(x)
             }
         }
@@ -2404,7 +2404,7 @@ extension ObservableMergeTest {
             ])
         
         let res = scheduler.start {
-            xs.flatMap { (x) in
+            xs.flatMap { x in
                 return Observable<Int64>.interval(10, scheduler: scheduler).map { _ in x } .take(x)
             }
         }
