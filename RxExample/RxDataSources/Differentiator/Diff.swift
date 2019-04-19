@@ -126,14 +126,17 @@ public enum Diff {
     //================================================================================
     // swift dictionary optimizations {
 
-    private struct OptimizedIdentity<E: Hashable> : Hashable {
+    private struct OptimizedIdentity<E: Hashable>: Hashable {
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(hash)
+        }
 
-        let hashValue: Int
+        let hash: Int
         let identity: UnsafePointer<E>
 
         init(_ identity: UnsafePointer<E>) {
             self.identity = identity
-            self.hashValue = identity.pointee.hashValue
+            self.hash = identity.pointee.hashValue
         }
 
         static func == (lhs: OptimizedIdentity<E>, rhs: OptimizedIdentity<E>) -> Bool {
@@ -181,7 +184,7 @@ public enum Diff {
                 return ContiguousArray<ItemAssociatedData>(repeating: ItemAssociatedData.initial, count: items.count)
             })
 
-            try initialIdentities.withUnsafeBufferPointer { (identitiesBuffer: UnsafeBufferPointer<Identity>) -> () in
+            try initialIdentities.withUnsafeBufferPointer { (identitiesBuffer: UnsafeBufferPointer<Identity>) -> Void in
                 var dictionary: [OptimizedIdentity<Identity>: Int] = Dictionary(minimumCapacity: totalInitialItems * 2)
 
                 for i in 0 ..< initialIdentities.count {
